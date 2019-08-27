@@ -1,4 +1,4 @@
-package queue
+package main
 
 import (
 	"fmt"
@@ -20,25 +20,11 @@ func New() *Queue {
 	return queue
 }
 
-func (q *Queue) Len() int {
+func (q *Queue) Push(element interface{}) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	return q.len
-}
-
-func (q *Queue) Empty() bool {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
-	return q.len == 0
-}
-
-func (q *Queue) Push(item interface{}) {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
-	q.queue = append(q.queue, item)
+	q.queue = append(q.queue, element)
 	q.len++
 }
 
@@ -50,22 +36,27 @@ func (q *Queue) Pop() (interface{}, error) {
 		return nil, fmt.Errorf("Queue is empty")
 	}
 
-	item := q.queue[0]
+	elm := q.queue[0]
 	q.queue = q.queue[1:]
-	q.len--
+	q.len++
 
-	return item, nil
+	return elm, nil
 }
 
-func (q *Queue) Front() interface{} {
+func (q *Queue) Front() (interface{}, error) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	if q.len == 0 {
-		return nil
+		return nil, fmt.Errorf("Queue is empty")
 	}
 
-	item := q.queue[0]
+	return q.queue[0], nil
+}
 
-	return item
+func (q *Queue) Len() int {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	return q.len
 }
